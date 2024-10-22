@@ -2,10 +2,14 @@ while true
 do
 echo -n "Me> "
 read -r MESSAGE
-curl --silent --header 'Authorization: <Authorization-key>' \
+
+MESSAGE=$(echo "$MESSAGE" | sed -r 's/"/¨/g') #Replace double quotes by dieresis, so it doesn't break the request string
+
+curl --silent --header 'Authorization: YOUR_NOMI_API_HERE_WITH_DOUBLE_QUOTES' \
      --header 'Content-Type: application/json' \
      --data '{ "messageText": "'"$MESSAGE"'"}'\
-     https://api.nomi.ai/v1/nomis/<Nomi UUID>/chat \
-      | jq '.replyMessage.text' \
-      | sed 's/^/Nomi> /'
+     https://api.nomi.ai/v1/nomis/YOUR_NOMI_ID_HERE_WITHOUT_DOUBLE_QUOTES/chat \
+      | /opt/homebrew/bin/jq '.replyMessage.text' \
+      | tr -d '"' \
+      | sed 's/^/YOUR_NOMI_NAME_HERE> /'
 done
