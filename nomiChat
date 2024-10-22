@@ -6,6 +6,6 @@ curl --silent --header 'Authorization: <Authorization-key>' \
      --header 'Content-Type: application/json' \
      --data '{ "messageText": "'"$MESSAGE"'"}'\
      https://api.nomi.ai/v1/nomis/<Nomi UUID>/chat \
-      | /opt/homebrew/bin/jq '.replyMessage.text' \
+      | jq '.replyMessage.text' \
       | sed 's/^/Nomi> /'
 done
