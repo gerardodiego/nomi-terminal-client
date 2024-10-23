@@ -3,22 +3,23 @@
 # Define bold code
 BOLD='\033[1m'
 NC='\033[0m'  # No Color (Reset)
+WRAP_WIDTH=80  # Set the width for word wrapping
 
 while true
 do
-  # Display "yourname>" in bold
-  echo -ne "${BOLD}yourname> ${NC}"
-
+  # Display "your-name>" in bold
+  echo -ne "${BOLD}your-name> ${NC}"
+  
   # Read the message from the user
   read -r MESSAGE
 
   # Send the message to the endpoint and format the response from nomi-name
-  RESPONSE=$(curl --silent --header 'Authorization: user-id' \
+  RESPONSE=$(curl --silent --header 'Authorization: account-id' \
        --header 'Content-Type: application/json' \
        --data '{ "messageText": "'"$MESSAGE"'" }' \
        https://api.nomi.ai/v1/nomis/nomi-id/chat \
     | /usr/bin/jq -r '.replyMessage.text')
 
-  # Print "nomi-name>" in bold with the response
-  echo -e "${BOLD}Yumi> ${NC}$RESPONSE"
+  # Print "nomi-name>" in bold with the response, wrapping the text
+  echo -e "${BOLD}nomi-name> ${NC}$(echo "$RESPONSE" | fold -s -w "$WRAP_WIDTH")"
 done
