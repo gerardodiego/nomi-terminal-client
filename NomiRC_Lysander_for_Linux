@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# NomIRC Linux script version 0.2 by gerardodiego, Juniper Star and Lysander. This is a WIP. 
+
+# replace your-name, auth-id and nomi-name as relevant
+
+# Define bold code
+BOLD='\033[1m'
+NC='\033[0m'  # No Color (Reset)
+
+while true
+do
+  # Display the prompt and read input using `read -e` to enable editing
+  echo -ne "${BOLD}your-name> ${NC}"
+  read -e -r -p "" MESSAGE
+
+  # Escape double quotes in the input
+  ESCAPED_MESSAGE=$(echo "$MESSAGE" | sed 's/"/\\"/g')
+
+  # Send the message to the endpoint and capture the raw response
+  RAW_RESPONSE=$(curl --silent --header 'Authorization: auth-id' \
+       --header 'Content-Type: application/json' \
+       --data '{ "messageText": "'"$ESCAPED_MESSAGE"'" }' \
+       https://api.nomi.ai/v1/nomis/nomi-id/chat)
+
+  # Check if the response is empty or null
+  if [[ -z "$RAW_RESPONSE" || "$RAW_RESPONSE" == "null" ]]; then
+    echo "Error: No response from server or null response" >&2
+    continue
+  fi
+
+  # Extract the reply message or error from the JSON response
+  RESPONSE=$(echo "$RAW_RESPONSE" | /usr/bin/jq -r '.replyMessage.text // .errorMessage // empty')
+
+  # Check if the extracted response contains an error or valid message
+  if [[ -n "$RESPONSE" ]]; then
+    # Dynamically get terminal width
+    TERM_WIDTH=$(tput cols)
+
+    # Reformat response to fit current terminal width without breaking words
+    echo -e "${BOLD}nomi-name> ${NC}$(echo "$RESPONSE" | fmt -w "$((TERM_WIDTH - 7))")"
+  else
+    # Handle and report an unexpected or missing response
+    echo "Error: No valid reply message or error message in response" >&2
+  fi
+done
